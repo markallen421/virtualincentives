@@ -1,0 +1,20 @@
+{
+    "name": "ktcrain/virtualincentives",
+    "description": "Rest API PHP SDK for Real-Time Ordering of Prepaid Virtual Rewards",
+    "authors": [
+        {
+            "name": "Katie Crain",
+            "email": "kt.crain@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.0",
+        "guzzlehttp/guzzle": "~4",
+        "rhumsaa/uuid": "~2.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ktcrain\\VirtualIncentives\\": "src/"
+        }
+    }
+}
