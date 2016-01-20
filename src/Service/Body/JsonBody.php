@@ -7,15 +7,6 @@ use Ktcrain\VirtualIncentives\Service\Body\Exception\UnexpectedValueException;
 
 class JsonBody extends AbstractBody
 {
-    /**
-     * Transaction Status Enums
-     *
-     * @var array
-     */
-    protected $transactionStatusEnums = [
-        'APPROVED' => 0,
-        'Error'    => 1,
-    ];
 
     /**
      * Set Data From String

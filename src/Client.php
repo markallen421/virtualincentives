@@ -37,12 +37,14 @@ class Client
      * @param array $config Config
      */
     public function __construct(array $config = [])
-    {
+    {        
         foreach ([
-            // $key => [array $possibilities, $default],
             'sandbox' => [[true, false], false],
         ] as $key => $rules) {
             $this->setConfig($key, (array_key_exists($key, $config) && in_array($config[$key], $rules[0])) ? $config[$key] : $rules[1]);
+        }
+        foreach($config as $key => $value) {
+            $this->setConfig($key, $value);
         }
     }
 
@@ -58,7 +60,6 @@ class Client
     {
         try {
             $name = ucfirst($name);
-
             return $this->getService($name);
         } catch (InvalidArgumentException $e) {
             throw new BadMethodCallException(sprintf("Method `%s` does not exist", $name));
@@ -138,6 +139,13 @@ class Client
     }
 
     /**
+     * @return string
+     */
+    public function getAuthString() {
+        return base64_encode($this->getConfig('username').':'.$this->getConfig('password'));
+    }
+
+    /**
      * Send
      *
      * @param ServiceInterface $service Service
@@ -157,41 +165,40 @@ class Client
         $body = $service->getBody();
 
         $requestBody = $body;
-        echo $requestBody . "\n\n";
         if (isset($_GET['debug'])) {
             echo $requestBody . "\n\n";
         }
 
         $request = $this->getHttpClient()->createRequest($method, $uri, [
             'Content-Type' => $content_type,
+            'Authorization' => 'Basic '.$this->getAuthString()
         ], $body);
 
         $response = $this->getHttpClient()->send($request);
 
-        var_dump($response);die;
+        if($response->getStatusCode() !== '200') {
+            throw new RuntimeException($response->getStatusCode().' '.$response->getReasonPhrase());
+        }
 
+        // Ktcrain\VirtualIncentives\Service\Body\JsonBody
         $class = get_class($body);
 
         $body = new $class;
 
         $body->setDataFromString($response->getBody(true));
 
-        /*
-        if ($body->getTransactionStatus() != 'APPROVED') {
-            $transaction_items = $body->getTransactionItems();
-
-            foreach ($transaction_items as $transaction_item) {
-                if ($transaction_item['Status'] == 'ERROR') {
-                    #throw new RuntimeException(sprintf("%s", $transaction_item['ErrorDescription'] . "\n\n request body \n " . $requestBody . "\n\n response body \n" . $response->getBody(true)));
-                    throw new RuntimeException(sprintf("%s", $transaction_item['ErrorDescription']));
-                }
-            }
-
+        $data = $body->getData();
+        
+        if (empty($data)) {
             throw new RuntimeException(sprintf("There was a problem making the request"));
         }
 
-        return $body->getTransactionItems();
-        */
+        if(isset($data['order']['errors'])) {
+            $err = $data['order']['errors'][0];
+            throw new RuntimeException(sprintf("Error code %s (field %s) %s", $err['code'],$err['field'],$err['message']));
+        }
+
+        return $body->getData();
 
     }
 
