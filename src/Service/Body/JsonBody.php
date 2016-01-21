@@ -38,11 +38,7 @@ class JsonBody extends AbstractBody
      */
     public function getDataAsString()
     {
-        $data = [];
-
-        if ($this->has('order')) {
-            Arr::set($data, 'order', $this->get('order'));
-        }
+        $data = $this->data;
 
         return json_encode($data);
     }

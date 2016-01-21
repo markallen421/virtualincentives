@@ -4,11 +4,11 @@ namespace Ktcrain\VirtualIncentives\Service;
 class OrderService extends AbstractService
 {
     /**
-     * Value
+     * Order
      *
-     * @var string
+     * @var object
      */
-    protected $value;
+    protected $order;
 
     /**
      * Endpoint
@@ -24,7 +24,11 @@ class OrderService extends AbstractService
      */
     public function configure()
     {
-        $this->getBody()->set('order', (object) []);
+        $this->order = (object) [
+            'programid' => null,
+            'clientid' => $this->generateClientId(),
+            'accounts' => [],
+        ];
     }
 
     /**
@@ -42,35 +46,24 @@ class OrderService extends AbstractService
      *
      * @param string $program_id Program ID
      * @param array $accounts Accounts
-     *
      * @return OrderService Service
      */
     public function setOrder($program_id, $accounts = [])
     {
-        /*
-            {  
-               "order":{  
-                  "programid":"26490",
-                  "clientid":"56258125",
-                  "accounts":[  
-                     {  
-                        "firstname":"John",
-                        "lastname":"Doe",
-                        "email":"john.doe@example.com",
-                        "sku":"UVC-V-A06",
-                        "amount":"10.00"
-                     }
-                  ]
-               }
-            }
-        */
+        $this->order->programid = $program_id;
+        $this->order->accounts = $accounts;
+        return $this;
+    }
 
-        $this->order = (object) [
-            'programid' => $program_id,
-            'clientid' => $this->generateClientId(),
-            'accounts' => $accounts,
-        ];
-
+    /**
+     * Set ProgramId
+     *
+     * @param string $program_id Program ID
+     * @return OrderService Service
+     */
+    public function setProgramId($program_id)
+    {
+        $this->order->programid = $program_id;
         return $this;
     }
 
@@ -93,16 +86,6 @@ class OrderService extends AbstractService
      */
     public function addAccount($account)
     {
-        /*
-             {  
-                "firstname":"John",
-                "lastname":"Doe",
-                "email":"john.doe@example.com",
-                "sku":"UVC-V-A06",
-                "amount":"10.00"
-             }
-        */
-
         $this->order->accounts[] = $account;
 
         return $this;

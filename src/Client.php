@@ -156,7 +156,7 @@ class Client
     {
         $service->prepare();
 
-        $method = 'POST';
+        $method = $service->getMethod();
 
         $uri = $service->getEndpoint();
 
@@ -188,13 +188,17 @@ class Client
         $body->setDataFromString($response->getBody(true));
 
         $data = $body->getData();
-        
+
         if (empty($data)) {
             throw new RuntimeException(sprintf("There was a problem making the request"));
         }
 
         if(isset($data['order']['errors'])) {
             $err = $data['order']['errors'][0];
+            // accounts error
+            if($err['code'] == '15') {
+                $err = $data['order']['accounts'][0]['errors'][0];
+            }
             throw new RuntimeException(sprintf("Error code %s (field %s) %s", $err['code'],$err['field'],$err['message']));
         }
 

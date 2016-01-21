@@ -35,6 +35,20 @@ abstract class AbstractService implements ServiceInterface
      */
     protected $endpoint;
 
+    protected $method = 'POST';
+
+    /**
+     * Order Status Enums
+     *
+     * @var array
+     */
+    protected $statusEnums = [
+        'pending',
+        'processing',
+        'completed',
+        'canceled',
+    ];
+
     /**
      * Constructor
      *
@@ -57,6 +71,16 @@ abstract class AbstractService implements ServiceInterface
     public function getEndpoint()
     {
         return $this->endpoint;
+    }
+
+    /**
+     * Get Method
+     *
+     * @return string method
+     */
+    public function getMethod()
+    {
+        return $this->method;
     }
 
     /**
@@ -121,4 +145,15 @@ abstract class AbstractService implements ServiceInterface
         return $this->body;
     }
 
+    /**
+     * @param string $status
+     * @return boolean
+     * @throws InvalidArgumentException
+     */
+    public function validateStatus($status) {
+        if(!in_array($status, $this->statusEnums)) {
+            throw new \InvalidArgumentException(sprintf("Status %s is not allowed.", $status));
+        }
+        return true;
+    }
 }
