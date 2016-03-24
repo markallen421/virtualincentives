@@ -9,8 +9,8 @@
     ],
     "require": {
         "php": ">=5.5.0",
-        "guzzlehttp/guzzle": "~4",
-        "rhumsaa/uuid": "~2.7"
+        "guzzlehttp/guzzle": "~6",
+        "ramsey/uuid": "~2.7"
     },
     "autoload": {
         "psr-4": {

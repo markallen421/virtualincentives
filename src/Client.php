@@ -37,7 +37,7 @@ class Client
      * @param array $config Config
      */
     public function __construct(array $config = [])
-    {        
+    {
         foreach ([
             'sandbox' => [[true, false], false],
         ] as $key => $rules) {
@@ -152,7 +152,7 @@ class Client
      *
      * @return mixed Data
      */
-    public function send(ServiceInterface $service)
+    public function send(ServiceInterface $service, $options = [])
     {
         $service->prepare();
 
@@ -174,7 +174,7 @@ class Client
             'Authorization' => 'Basic '.$this->getAuthString()
         ], $body);
 
-        $response = $this->getHttpClient()->send($request);
+        $response = $this->getHttpClient()->send($request, $options);
 
         if($response->getStatusCode() !== '200') {
             throw new RuntimeException($response->getStatusCode().' '.$response->getReasonPhrase());

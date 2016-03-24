@@ -3,6 +3,7 @@ namespace Ktcrain\VirtualIncentives\Http;
 
 use Ktcrain\VirtualIncentives\Client as ViClient;
 use GuzzleHttp\Client as GuzzleClient;
+use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Stream\Stream;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 use Ktcrain\VirtualIncentives\Http\Exception\RequestException as ViRequestException;
@@ -38,9 +39,9 @@ class Client
         else {
                 $base_url = 'https://rest.virtualincentives.com/v3/json/';
         }
-        
+
         $this->guzzleClient = new GuzzleClient([
-            'base_url' => $base_url,
+            'base_uri' => $base_url,
             'defaults' =>  [
                 'verify' => false,
             ],
@@ -60,22 +61,8 @@ class Client
      */
     public function createRequest($method, $url, array $headers = [], $body = NULL, array $options = [])
     {
-        $arguments = [$method, $url];
-
-        if (!empty($options)) {
-            array_push($arguments, $options);
-        }
-
-        $request = call_user_func_array([$this->guzzleClient, 'createRequest'], $arguments);
-
-        foreach ($headers as $key => $value) {
-            $request->setHeader($key, $value);
-        }
-
-        if (!is_null($body)) {
-            $request->setBody(Stream::factory($body));
-        }
-
+        $this->options = $options;
+        $request = new Request($method, $url, $headers, $body);
         return $request;
     }
 
@@ -94,7 +81,7 @@ class Client
     {
         $request = $this->createRequest($method, $url, $headers, $body, $options);
 
-        return $this->send($request);
+        return $this->send($request, $options);
     }
 
     /**
@@ -104,10 +91,13 @@ class Client
      *
      * @return mixed Response
      */
-    public function send($request)
+    public function send($request, $options = [])
     {
+        if(!count($options) && count($options))
+            $options = $this->options;
+
         try {
-            return $this->guzzleClient->send($request);
+            return $this->guzzleClient->send($request, $options);
         } catch (GuzzleRequestException $exception) {
             if ($exception->hasResponse()) {
                 return $exception->getResponse();
