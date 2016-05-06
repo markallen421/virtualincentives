@@ -176,7 +176,9 @@ class Client
 
         $response = $this->getHttpClient()->send($request, $options);
 
-        if($response->getStatusCode() !== '200') {
+        \Log::info("Virtual Incentive Rsponse:\n".json_encode(json_decode($response->getBody(true)), JSON_PRETTY_PRINT));
+
+        if((int)$response->getStatusCode() !== 200) {
             throw new RuntimeException($response->getStatusCode().' '.$response->getReasonPhrase());
         }
 
